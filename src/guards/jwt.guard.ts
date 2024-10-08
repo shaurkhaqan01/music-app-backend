@@ -33,7 +33,13 @@ export class JWTGuard extends AuthGuard('jwt') {
   handleRequest(err, user, info: Error) {
     if (err || info || !user) {
       throw new UnauthorizedException(
-        err?.message || info?.message || 'Unauthorized',
+        {
+          status: 'Fail',
+          data: {},
+          statusCode:401,
+          message:'Unauthorized'
+        }
+        // err?.message || info?.message || 'Unauthorized',
       );
     }
 

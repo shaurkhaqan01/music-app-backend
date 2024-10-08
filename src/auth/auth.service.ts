@@ -141,7 +141,12 @@ export class AuthService {
   async updateUser(id: string, user: Partial<User>) {
     const userObj = await this.userService.update(id, user);
     if (!userObj) {
-      throw new UnprocessableEntityException(userObj);
+      throw new UnprocessableEntityException({
+        status: 'Fail',
+        data: {},
+        statusCode:401,
+        message:''
+      });
     }
     return userObj;
   }
@@ -157,7 +162,12 @@ export class AuthService {
   async verifyRegistrationToken(token: string){            
     const user = await this.userService.findUserByToken(token);    
     if(!user){
-      throw new NotFoundException('Invalid one time pin');
+      throw new NotFoundException({
+        status: 'Fail',
+        data: {},
+        statusCode:404,
+        message:'Invalid one time pin'
+      });
     }else{
       await this.updateUser(user.id, { 
         isVerified: true,
@@ -247,7 +257,12 @@ export class AuthService {
         url : attachment
       }
     }else { 
-    throw new BadRequestException('Invalid file.'); 
+    throw new BadRequestException({
+      status: 'Fail',
+      data: {},
+      statusCode:400,
+      message:'Invalid file.'
+    }); 
     }
   }
   public async emailSending(email: string, otp: string) {

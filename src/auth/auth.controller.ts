@@ -56,7 +56,12 @@ export class AuthController {
     const { email, password } = body;
     const user = await this.authService.findUserByEmail(email);
     if(user.isVerified === false){
-      throw new UnauthorizedException('User is not verified');
+      throw new UnauthorizedException({
+        status: 'Fail',
+        data: {},
+        statusCode:401,
+        message:'User is not verified'
+      });
     }
 
 
@@ -65,12 +70,27 @@ export class AuthController {
         ? await this.authService.validateCredentials(user, password)
         : false;
       if (!valid) {
-        throw new UnauthorizedException('Invalid credentials.');
+        throw new UnauthorizedException({
+          status: 'Fail',
+          data: {},
+          statusCode:401,
+          message:'Invalid credentials.'
+        });
       }
     } else if (user && !user.isVerified) {
-      throw new UnauthorizedException('User is not verified.');
+      throw new UnauthorizedException({
+        status: 'Fail',
+        data: {},
+        statusCode:401,
+        message:'User is not verified.'
+      });
     } else {
-      throw new UnauthorizedException('User does not exists.');
+      throw new UnauthorizedException({
+        status: 'Fail',
+        data: {},
+        statusCode:401,
+        message:'User does not exists.'
+      });
     }
     const accessToken = await this.authService.generateAccessToken(user);
     const refreshToken = await this.authService.generateRefreshToken(user);
@@ -86,8 +106,10 @@ export class AuthController {
 
     };
     return {
-      status: 'success',
-      data: payload,
+      status: 'Success',
+      data: {data:payload},
+      statusCode:200,
+      message:'Login Succesfully'
     };
   }
 
@@ -98,7 +120,12 @@ export class AuthController {
     const { password } = body;
     const user = await this.authService.findBySecretToken(secretToken);
     if (!user) {
-      throw new UnauthorizedException('Invalid User.');
+      throw new UnauthorizedException({
+        status: 'Fail',
+        data: {},
+        statusCode:401,
+        message:'Invalid User.'
+      });
     }
     const updatedUser = await this.authService.resetPassword(
       user,
@@ -106,11 +133,20 @@ export class AuthController {
     );
     if (!updatedUser) {
       throw new ConflictException(
-        'Unable to update password for the user. Please try restarting the process.',
+        {
+          status: 'Fail',
+          data: {},
+          statusCode:409,
+          message: 'Unable to update password for the user. Please try restarting the process.',
+        }
+       
       );
     }
     return {
-      status: 'success',
+      status: 'Success',
+      data: {data:{}},
+      statusCode:200,
+      message:'Succesfully'
     };
   }
 
@@ -145,19 +181,32 @@ export class AuthController {
     if(email){
       const user = await this.authService.findUserByEmail(email);    
       if(!user){
-        throw new NotFoundException('Email Not found');
+        throw new NotFoundException( {
+          status: 'Fail',
+          data: {},
+          statusCode:401,
+          message: 'Email Not found',
+        });
       }
       else{
         user.secretKey = (Math.floor(Math.random() * 100000) + 100000).toString();
         await this.authService.updateUser(user.id,{secretKey:user.secretKey});
         await this.authService.emailSending(user.email, user.secretToken)
         return {
-          status: 'Code sent successfully',
-        }
+          status: 'Success',
+          data: {data:{}},
+          statusCode:200,
+          message:'Code Sent Succesfully'
+        };
       }
     }
     else{
-      throw new NotFoundException('Email not found');
+      throw new NotFoundException({
+        status: 'Fail',
+        data: {},
+        statusCode:401,
+        message: 'Email Not found',
+      });
     } 
   }
 
@@ -169,17 +218,29 @@ export class AuthController {
     if(secretKey){
       const user = await this.authService.findUserBySecretKey(secretKey);    
       if(!user){
-        throw new NotFoundException('Invalid Otp');
+        throw new NotFoundException({
+          status: 'Fail',
+          data: {},
+          statusCode:401,
+          message: 'Invalid Otp',
+        });
       }
       else{
         return {
-          message:"token verified successfully",
-          secretToken: user.secretToken
-        }
+          status: 'Success',
+          data: {data:{secretToken: user.secretToken}},
+          statusCode:200,
+          message:'Token verified successfully'
+        };
       }
     }
     else{
-      throw new NotFoundException('Invalid Otp');
+      throw new NotFoundException({
+        status: 'Fail',
+        data: {},
+        statusCode:401,
+        message:'Invalid Otp'
+      });
     }
     
   }
@@ -201,8 +262,16 @@ export class AuthController {
   @Post('attachment-upload')
   create(
     @UploadedFile() file: Express.Multer.File,
-  ) {        
-    return this.authService.fileUpload(file);
+  ) {     
+
+    let fileString = this.authService.fileUpload(file);
+    return {
+      status: 'Success',
+      data: {data:{file: fileString}},
+      statusCode:200,
+      message:'Token verified successfully'
+    };
+
   }
 
   buildResponsePayload(user: User, accessToken: string, refreshToken?: string) {

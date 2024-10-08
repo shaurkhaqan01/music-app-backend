@@ -33,7 +33,13 @@ export class Uploader {
     if (data.$metadata.httpStatusCode === 200) {
       return `${process.env.SPACE_BASE_URL}/${fileKey}`;
     }
-    throw new UnprocessableEntityException('File uploading failed.');
+    throw new UnprocessableEntityException({
+      status: 'Fail',
+      data: {},
+      statusCode:422,
+      message:'File uploading failed.'
+
+    });
   }
   public static getInstance(): Uploader {
     if (Uploader.instance === null) {

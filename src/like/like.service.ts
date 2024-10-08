@@ -22,13 +22,23 @@ export class LikeService {
   async likeSong(userId: string, songId: string) {
     let alreadyExist = await this.likeRepository.findOne({where:{user:{id:userId, song:{id:songId}}}});
     if(alreadyExist){
-      throw new BadRequestException('Already liked');
+      throw new BadRequestException({
+        status: 'Fail',
+        data: {},
+        statusCode:400,
+        message:'Already liked'
+      });
     }else{
-      const user = await this.userService.findOne(userId);
-      const song = await this.songService.findOne(songId);
+      const user = (await this.userService.findOne(userId)).data.data;
+      const song = (await this.songService.findOne(songId)).data.data;
   
       if (!user || !song) {
-          throw new NotFoundException('User or song not found');
+          throw new NotFoundException({
+            status: 'Fail',
+            data: {},
+            statusCode:404,
+            message:'User or song not found'
+          });
       }
   
       const like = this.likeRepository.create({ user, song });
@@ -37,8 +47,12 @@ export class LikeService {
       // Update the likes count on the song
       song.likesCount++;
       await this.songService.update(song.id,{likesCount:song.likesCount});
-  
-      return like;
+      return {
+        status: 'Success',
+        data: {data:like},
+        statusCode:200,
+        message:'Succesfully'
+      };
     }
     
   }

@@ -43,7 +43,13 @@ export class UserService {
     });
     let user;
     if (foundUser) {
-      throw new UnprocessableEntityException('This email is already in use.');
+      throw new UnprocessableEntityException({
+        status: 'Fail',
+        data: {},
+        statusCode:422,
+        message:'User already exists with this email.'
+
+      });
     }else{
       user = new User();
     }
@@ -58,7 +64,13 @@ export class UserService {
     const createdUser = await this.userRepository.save(user);
     if (!createdUser) {
       throw new UnprocessableEntityException(
-        'Unable to create user. Please try again.'
+        {
+          status: 'Fail',
+          data: {},
+          statusCode:422,
+          message:'Unable to create user. Please try again.'
+
+        }
       );
     }
     const accessToken = await this.generateAccessToken(user);
@@ -75,8 +87,10 @@ export class UserService {
 
     };
     return {
-      status: 'success',
-      data: payload,
+      status: 'Success',
+      data: {data:payload},
+      statusCode:200,
+      message:'Login Succesfully'
     };
   }
   async createUser(createUserDto: RegisterUserRequest) {
@@ -85,7 +99,12 @@ export class UserService {
     });
     let user;
     if (foundUser) {
-      throw new UnprocessableEntityException('This phone number is already in use.');
+      throw new UnprocessableEntityException({
+        status: 'Fail',
+        data: {},
+        statusCode:422,
+        message:'User already exists with this email.'
+      });
     }else{
       user = new User();
     }
@@ -103,7 +122,13 @@ export class UserService {
     const createdUser = await this.userRepository.save(user);
     if (!createdUser) {
       throw new UnprocessableEntityException(
-        'Unable to create user. Please try again.'
+        {
+          status: 'Fail',
+          data: {},
+          statusCode:422,
+          message:'Unable to create user. Please try again.'
+
+        }
       );
     }
     const accessToken = await this.generateAccessToken(user);
@@ -120,8 +145,10 @@ export class UserService {
 
     };
     return {
-      status: 'success',
-      data: payload,
+      status: 'Success',
+      data: {data:payload},
+      statusCode:200,
+      message:'Login Succesfully'
     };
   }
 
@@ -149,7 +176,12 @@ export class UserService {
       };
   }));
 
-  return artistWithFollowStatus;
+    return {
+      status: 'Success',
+      data: {data:artistWithFollowStatus},
+      statusCode:200,
+      message:'List of artist'
+    };
   }
 
   async findById(id: string) {
@@ -171,7 +203,12 @@ export class UserService {
       },
     });
     if (!user) {
-      throw new UnauthorizedException('User not found.');
+      throw new UnauthorizedException({
+        status: 'Fail',
+        data: {},
+        statusCode:401,
+        message:'User not found.'
+      });
     }
     return user;
   }
@@ -181,13 +218,30 @@ export class UserService {
       where: { id },
     });
     if (!user) {
-      throw new UnauthorizedException('User not found.');
+      throw new UnauthorizedException({
+        status: 'Fail',
+        data: {},
+        statusCode:401,
+        message:'Unauthorized'
+      });
     }
-    return user;
+    return {
+      status: 'Success',
+      data: {data:user},
+      statusCode:200,
+      message:'User detail'
+    };
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    return this.userRepository.update(id, updateUserDto);
+    await this.userRepository.update(id, updateUserDto);
+    let user = await this.userRepository.findOne({where:{id:id}});
+    return {
+      status: 'Success',
+      data: {data:user},
+      statusCode:200,
+      message:'User detail'
+    };
   }
 
   async followerCount(artistId: string) {
@@ -198,9 +252,20 @@ export class UserService {
     });
     if(user){
       await this.userRepository.update(artistId, {followersCount:user.followersCount + 1});
-      return this.userRepository.findOne({where:{id:artistId}});
+      let userObj = this.userRepository.findOne({where:{id:artistId}});
+      return {
+        status: 'Success',
+        data: {data:userObj},
+        statusCode:200,
+        message:'User'
+      };
     }else{
-      throw new BadRequestException('User not found');
+      throw new BadRequestException({
+        status: 'Fail',
+        data: {},
+        statusCode:401,
+        message:'User not found'
+      });
     }
   }
 
@@ -214,7 +279,12 @@ export class UserService {
     if (user) {
       return user;
     } else {
-      throw new BadRequestException('Invalid credentials.');
+      throw new BadRequestException({
+        status: 'Fail',
+        data: {},
+        statusCode:400,
+        message:'Invalid credentials.'
+      });
     }
   }
 
@@ -238,7 +308,12 @@ export class UserService {
       },
     });
     if (!user) {
-      throw new UnprocessableEntityException('Invalid one time pin');
+      throw new UnprocessableEntityException({
+        status: 'Fail',
+        data: {},
+        statusCode:422,
+        message:'Invalid one time pin'
+      });
     }
     delete user.password;
     delete user.secretToken;
@@ -267,7 +342,12 @@ export class UserService {
         password: hashedPassword,
       });
     } else {
-      throw new UnprocessableEntityException('Old Password is incorrect.');
+      throw new UnprocessableEntityException({
+        status: 'Fail',
+        data: {},
+        statusCode:422,
+        message:'Old Password is incorrect.'
+      });
     }
   }
 
@@ -281,7 +361,12 @@ export class UserService {
 
   private checkPassword(password: string) {
     if (!password) {
-      throw new UnprocessableEntityException('Password is required.');
+      throw new UnprocessableEntityException({
+        status: 'Fail',
+        data: {},
+        statusCode:422,
+        message:'Password is required.'
+      });
     }
     // if (
     //   password.length < 6 &&
@@ -305,7 +390,12 @@ export class UserService {
     }
     if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(user.email)) {
       throw new UnprocessableEntityException(
-        'A valid email address is required.'
+        {
+          status: 'Fail',
+          data: {},
+          statusCode:422,
+          message:'A valid email address is required.'
+        }
       );
     }
     this.checkPassword(user.password);

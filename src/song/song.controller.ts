@@ -43,32 +43,27 @@ export class SongController {
   //   );
   // }
 
-  @Public()
   @Post('add-song/:artistId')
   create(@Param('artistId') artistId: string,@Body() createSongDto: CreateSongDto) {
     return this.songService.createSongAgainstArtist(artistId,createSongDto);
   }
 
 
-  @Public()
   @Get('all-songs/:artistId')
   findAll(@Param('artistId') artistId: string) {
     return this.songService.findAllOfArtist(artistId);
   }
-  @Public()
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.songService.findOne(id);
   }
 
-  @Public()
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateSongDto: UpdateSongDto) {
     return this.songService.update(id, updateSongDto);
   }
-  @Public()
 
   @Delete(':id')
   remove(@Param('id') id: string) {

@@ -22,19 +22,35 @@ export class FollowService {
       }
     });
     if(alreadyFollowed){
-      throw new BadRequestException('Alread Exists')
+      throw new BadRequestException({
+        status: 'Fail',
+        data: {},
+        statusCode:400,
+        message:'Alread Exists'
+      })
     }else{
       const follower = await this.userRepository.findOne({where:{id:followerId}});
       const artist = await this.userRepository.findOne({where:{id:artistId}});
   
       if (!follower || !artist) {
-          throw new NotFoundException('Follower or artist not found');
+          throw new NotFoundException({
+            status: 'Fail',
+            data: {},
+            statusCode:404,
+            message:'Follower or artist not found'
+          });
       }
       const follow = this.followRepository.create({ follower, artist });
       artist.followersCount++;
       await this.userRepository.update(artist.id,{followersCount:artist.followersCount});
 
-      return this.followRepository.save(follow);
+      let followObj = await this.followRepository.save(follow);
+      return {
+        status: 'Success',
+        data: {data:followObj},
+        statusCode:200,
+        message:'Successful'
+      };
     }
         
   }
@@ -52,7 +68,13 @@ export class FollowService {
   }
 
   async getFollowers(artistId: string) {
-      return this.followRepository.count({ where: { artist: { id: artistId } } });
+      let count = await this.followRepository.count({ where: { artist: { id: artistId } } });
+      return {
+        status: 'Success',
+        data: {data:count},
+        statusCode:200,
+        message:'Successful'
+      };
   }
 
   async checkFollower(artistId: string,followerId:string) {
@@ -72,7 +94,12 @@ export class FollowService {
     const follow = await this.followRepository.findOne({
       where: { follower: { id: followerId }, artist: { id: artistId } },
     });
-    return follow
+    return {
+      status: 'Success',
+      data: {data:follow},
+      statusCode:200,
+      message:'Successful'
+    };
   }
 
   // async getFollowing(userId: string) {

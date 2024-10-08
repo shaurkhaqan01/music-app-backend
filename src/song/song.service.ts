@@ -29,22 +29,35 @@ export class SongService {
     song.title = createSongDto.title;
     song.artist = artist;
     song.attachment = createSongDto.attachment;
-    return await this.songRepository.save(
+    
+    let songObj =  await this.songRepository.save(
       song
     );
+    return {
+      status: 'Success',
+      data: {data:songObj},
+      statusCode:200,
+      message:'Succesfully'
+    };
   }
 
   async findAll() {
     return await this.songRepository.find();
   }
   async findAllOfArtist(artistId:string) {
-    return await this.songRepository.find({
+    let songs = await this.songRepository.find({
       where:{
         artist:{
           id:artistId
         }
       }
     });
+    return {
+      status: 'Success',
+      data: {data:songs},
+      statusCode:200,
+      message:'Succesfully'
+    };
   }
 
   async findOne(id: string) {
@@ -54,9 +67,19 @@ export class SongService {
       },
     });
     if (!song) {
-      throw new UnprocessableEntityException('Song not found');
+      throw new UnprocessableEntityException({
+        status: 'Fail',
+        data: {},
+        statusCode:422,
+        message:'Song not found'
+      },);
     }
-    return song;
+    return {
+      status: 'Success',
+      data: {data:song},
+      statusCode:200,
+      message:'Succesfully'
+    };
   }
 
   async update(id: string, updateSongDto: UpdateSongDto) {
@@ -66,16 +89,33 @@ export class SongService {
       },
     });
     if (!song) {
-      throw new UnprocessableEntityException('LeaveCateogy not found');
+      throw new UnprocessableEntityException({
+        status: 'Fail',
+        data: {},
+        statusCode:422,
+        message:'Song not found'
+      });
     }
     const songObj = await this.songRepository.update(
       id,
       updateSongDto
     );
     if (!songObj) {
-      throw new UnprocessableEntityException(songObj);
+      throw new UnprocessableEntityException({
+        status: 'Fail',
+        data: {},
+        statusCode:422,
+        message:'Fail'
+      });
     }
-    return songObj;
+    let updated = await this.songRepository.findOne({where:{id:id}});
+    
+    return {
+      status: 'Success',
+      data: {data:updated},
+      statusCode:200,
+      message:'Succesfully'
+    };
   }
 
   async getSongsForArtist(artistId: string, userId: string) {
@@ -87,10 +127,16 @@ export class SongService {
       relations: ['song'],
     });
     const likedSongIds = new Set(likedSongs.map(like => like.song.id));
-    return songs.map(song => ({
+    let songsArray =  songs.map(song => ({
         ...song,
         isLiked: likedSongIds.has(song.id),
     }));
+    return {
+      status: 'Success',
+      data: {data:songsArray},
+      statusCode:200,
+      message:'Succesfully'
+    };;
   }
 
   remove(id: number) {
