@@ -260,16 +260,16 @@ export class AuthController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   @Post('attachment-upload')
-  create(
+  async create(
     @UploadedFile() file: Express.Multer.File,
   ) {     
 
-    let fileString = this.authService.fileUpload(file);
+    let fileString = await this.authService.fileUpload(file);
     return {
       status: 'Success',
       data: {data:{file: fileString}},
       statusCode:200,
-      message:'Token verified successfully'
+      message:'Attachment uploaded successfully'
     };
 
   }
