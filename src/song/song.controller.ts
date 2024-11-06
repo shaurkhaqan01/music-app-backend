@@ -49,6 +49,7 @@ export class SongController {
   }
 
 
+  @Public()
   @Get('all-songs/:artistId')
   findAll(@Param('artistId') artistId: string) {
     return this.songService.findAllOfArtist(artistId);
@@ -74,5 +75,10 @@ export class SongController {
   async getSongs(@Param('artistId') artistId: string, @Req() req) {
       const userId = req.user.id; // Assuming user ID is stored in the request after authentication
       return this.songService.getSongsForArtist(artistId, userId);
+  }
+
+  @Get('artist/:id/stats')
+  async getTopCountries(@Param('id') artistId: string) {
+    return this.songService.getArtistStats(artistId);
   }
 }

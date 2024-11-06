@@ -48,7 +48,6 @@ export class UserController {
     return this.userService.update(id, updateUserDto);
   }
 
-  @Public()
   @Patch('follow-artist/:artistId')
   followArtist(@Param('artistId') artistId: string) {
     return this.userService.followerCount(artistId);

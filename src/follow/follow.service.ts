@@ -61,10 +61,23 @@ export class FollowService {
       });
 
       if (!follow) {
-          throw new NotFoundException('Follow relationship not found');
+          throw new NotFoundException({
+            status: 'Fail',
+            data: {},
+            statusCode:404,
+            message:'Follower or artist not found'
+          });
       }
-
-      return this.followRepository.remove(follow);
+      const artist = await this.userRepository.findOne({where:{id:artistId}});
+      artist.followersCount--;
+      await this.userRepository.update(artist.id,{followersCount:artist.followersCount});
+      const deleted = await this.followRepository.remove(follow);
+      return {
+        status: 'Success',
+        data: {data:deleted},
+        statusCode:200,
+        message:'Successful'
+      };
   }
 
   async getFollowers(artistId: string) {
@@ -94,12 +107,9 @@ export class FollowService {
     const follow = await this.followRepository.findOne({
       where: { follower: { id: followerId }, artist: { id: artistId } },
     });
-    return {
-      status: 'Success',
-      data: {data:follow},
-      statusCode:200,
-      message:'Successful'
-    };
+    if(follow){
+      return follow
+    }
   }
 
   // async getFollowing(userId: string) {

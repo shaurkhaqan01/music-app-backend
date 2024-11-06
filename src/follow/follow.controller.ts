@@ -17,10 +17,10 @@ export class FollowController {
       return this.followService.followUser(followerId, artistId);
   }
 
-  // @Delete(':followerId/:artistId')
-  // async unfollow(@Param('followerId') followerId: string, @Param('artistId') artistId: string) {
-  //     return this.followService.unfollowUser(followerId, artistId);
-  // }
+  @Delete('unfollow/:followerId/:artistId')
+  async unfollow(@Param('followerId') followerId: string, @Param('artistId') artistId: string) {
+      return this.followService.unfollowUser(followerId, artistId);
+  }
 
   @Public()
   @Get('artist/:artistId/followers')

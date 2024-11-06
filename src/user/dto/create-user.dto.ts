@@ -6,7 +6,7 @@ export class CreateUserDto {
     readonly name: string;
 
     @ApiProperty()
-    readonly image: string;
+    readonly profilePicture: string;
 
     @ApiProperty()
     readonly email: string;

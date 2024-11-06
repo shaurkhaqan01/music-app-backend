@@ -252,7 +252,7 @@ export class UserService {
     });
     if(user){
       await this.userRepository.update(artistId, {followersCount:user.followersCount + 1});
-      let userObj = this.userRepository.findOne({where:{id:artistId}});
+      let userObj = await this.userRepository.findOne({where:{id:artistId}});
       return {
         status: 'Success',
         data: {data:userObj},

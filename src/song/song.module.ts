@@ -6,9 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from 'src/user/user.module';
 import { LikeService } from 'src/like/like.service';
 import { Like } from 'src/like/entities/like.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Song,Like]),UserModule],
+  imports: [TypeOrmModule.forFeature([Song,Like,User]),UserModule],
   controllers: [SongController],
   providers: [SongService,LikeService],
   exports: [SongService],
